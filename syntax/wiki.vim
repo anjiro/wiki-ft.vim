@@ -44,14 +44,14 @@ unlet s:i s:gcolors s:ccolors
 
 " Add syntax groups and clusters for links
 for [s:group, s:type; s:contained] in [
-      \ ['wikiLinkUrl',       'url',         'wikiConcealLink'],
+      \ ['wikiLinkUrl',       'url',            'wikiConcealLink'],
       \ ['wikiLinkUrl',       'shortcite'],
-      \ ['wikiLinkWiki',      'wiki',        'wikiConcealLinkWiki'],
-      \ ['wikiLinkRef',       'ref_single'],
-      \ ['wikiLinkRefTarget', 'ref_target',  'wikiLinkUrl'],
-      \ ['wikiLinkRef',       'ref_double',  'wikiConcealLinkRef'],
-      \ ['wikiLinkMd',        'md',          'wikiConcealLinkMd'],
-      \ ['wikiLinkMdImg',     'md_fig',      'wikiConcealLinkMdImg'],
+      \ ['wikiLinkWiki',      'wiki',           'wikiConcealLinkWiki'],
+      \ ['wikiLinkRef',       'ref_shortcut'],
+      \ ['wikiLinkRef',       'ref_full',       'wikiConcealLinkRef'],
+      \ ['wikiLinkRefTarget', 'ref_definition', 'wikiLinkUrl'],
+      \ ['wikiLinkMd',        'md',             'wikiConcealLinkMd'],
+      \ ['wikiLinkMdImg',     'md_fig',         'wikiConcealLinkMdImg'],
       \ ['wikiLinkDate',      'date'],
       \]
   let s:rx = wiki#link#{s:type}#matcher().rx
@@ -67,6 +67,10 @@ for [s:group, s:type; s:contained] in [
         \ 'display contained contains=@NoSpell'
         \ . (empty(s:contained) ? '' : ',' . join(s:contained, ','))
 endfor
+
+" Proper matching of bracketed urls
+syntax match wikiLinkUrl "<\l\+:\%(\/\/\)\?[^>]\+>"
+      \ display contains=@NoSpell,wikiConcealLink
 
 syntax match wikiConcealLinkUrl
       \ `\%(///\=[^/ \t]\+/\)\zs\S\+\ze\%([/#?]\w\|\S\{15}\)`
@@ -165,6 +169,8 @@ let s:ignored = {
       \ 'resolv' : ['resolvError'],
       \ 'python' : ['pythonFString'],
       \ 'tex' : ['texString', 'texLigature'],
+      \ 'muttrc' : ['muttrcShellString', 'muttrcEscape'],
+      \ 'neomuttrc' : ['muttrcShellString', 'muttrcEscape'],
       \}
 
 let s:nested_types = ['tex']
@@ -229,7 +235,7 @@ highlight wikiListTodoPartial cterm=none gui=none
 
 execute 'syntax match wikiBold'
       \ '/' . wiki#rx#bold . '/'
-      \ 'contains=wikiConcealBold,@Spell'
+      \ 'contains=wikiBoldItalic,wikiConcealBold,@Spell'
 execute 'syntax match wikiBoldT'
       \ '/' . wiki#rx#bold . '/'
       \ 'contained contains=@Spell'
@@ -237,7 +243,7 @@ syntax match wikiConcealBold /*/ contained conceal
 
 execute 'syntax match wikiItalic'
       \ '/' . wiki#rx#italic . '/'
-      \ 'contains=wikiConcealItalic,@Spell'
+      \ 'contains=wikiItalicBold,wikiConcealItalic,@Spell'
 execute 'syntax match wikiItalicT'
       \ '/' . wiki#rx#italic . '/'
       \ 'contained contains=@Spell'
